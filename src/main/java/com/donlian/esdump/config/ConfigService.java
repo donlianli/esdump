@@ -1,5 +1,7 @@
 package com.donlian.esdump.config;
 
+import java.util.List;
+
 import org.elasticsearch.client.Client;
 
 /**
@@ -8,6 +10,22 @@ import org.elasticsearch.client.Client;
  *
  */
 public interface ConfigService {
+	/**
+	 * 默认备份还原集群名称
+	 */
+	public static String DEFAULT_CLUSTER_NAME="elasticsearch";
+	/**
+	 * 默认备份还原机器地址
+	 */
+	public static String DEFAULT_ADDRESS = "localhost:9200";
+	/**
+	 * 
+	 */
+	public static String DATA_EXT="docs";
+	/**
+	 * 
+	 */
+	public static String MAP_EXT = "map";
 	/**
 	 * 批量索引的阈值
 	 * @return
@@ -73,4 +91,41 @@ public interface ConfigService {
 	 * @return
 	 */
 	boolean disableMultiThread();
+	/**
+	 * 设置备份目录
+	 * @param backupDir
+	 */
+	public void setBackupDir(String backupDir);
+	/**
+	 * 获得备份目录
+	 * @return
+	 */
+	public String getBackupDir();
+	/**
+	 * 设置恢复文件目录
+	 * @param restoreDir
+	 */
+	public void setRestoreDir(String restoreDir);
+	/**
+	 * 获得恢复文件目录
+	 * @return
+	 */
+	public String getRestoreDir();
+	/**
+	 * 获得备份集群名称
+	 * @return
+	 */
+	public String getBackupClusterName();
+	/**
+	 * 设置备份集群名称
+	 * @return
+	 */
+	public void setBackupClusterName(String clusterName);
+	/**
+	 * 初始化备份配置
+	 * @param config
+	 */
+	public void initBackupConfig();
+	public List<String> getBackupIndices() ;
+	
 }
