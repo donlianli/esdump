@@ -97,16 +97,22 @@ public class BackupServiceImpl implements BackupService{
 		configService.getBackupClient().close();
 		logger.debug("exit backup method");
 	}
+	/**
+	 * 使用索引备份
+	 * @param indexName
+	 */
 	private void backupByIndexName(String indexName) {
 		try {
 			backupMapping(indexName);
 			backupDoc(indexName);
-			if(this.multiThread && this.latch!=null){
-				this.latch.countDown();
-			}
 		} catch (Exception e) {
 			logger.error("backup index:{} error",indexName);
 			e.printStackTrace();
+		}
+		finally{
+			if(this.multiThread && this.latch!=null){
+				this.latch.countDown();
+			}
 		}
 	}
 	/**
