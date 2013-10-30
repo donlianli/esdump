@@ -11,7 +11,9 @@ import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 
+import com.donlian.esdump.common.InputParaTag;
 import com.google.common.base.Splitter;
+
 import static com.google.common.base.Strings.isNullOrEmpty;
 
 public class ConfigServiceImpl implements ConfigService {
@@ -123,7 +125,7 @@ public class ConfigServiceImpl implements ConfigService {
 		/**
 		 * 备份机器
 		 */
-		String address = System.getProperty("addr", DEFAULT_ADDRESS);
+		String address = System.getProperty(InputParaTag.ADDR, DEFAULT_ADDRESS);
 		List<String> list = Splitter.on(':').trimResults()
 					       .omitEmptyStrings()
 					       .splitToList(address);
@@ -132,7 +134,7 @@ public class ConfigServiceImpl implements ConfigService {
 		/**
 		 * 设置集群名称
 		 */
-		String clusterName = System.getProperty("cluster", DEFAULT_CLUSTER_NAME);
+		String clusterName = System.getProperty(InputParaTag.CLUSTER, DEFAULT_CLUSTER_NAME);
 		setBackupClusterName(clusterName);
 		Settings settings = ImmutableSettings.settingsBuilder()
 				//指定集群名称
@@ -150,7 +152,7 @@ public class ConfigServiceImpl implements ConfigService {
 		/**
 		 * 设置备份目录，没有则以当前目录为准
 		 */
-		String backupDir = System.getProperty("backupDir", getDefaultDir());
+		String backupDir = System.getProperty(InputParaTag.BACKUP_DIR, getDefaultDir());
 		setBackupDir(backupDir);
 		if(logger.isInfoEnabled()){
 			logger.info("clusterName:{},connect use address:{}:{},backup directory:{}"
@@ -160,7 +162,7 @@ public class ConfigServiceImpl implements ConfigService {
 		/**
 		 * 设置备份特定的索引
 		 */
-		String index = System.getProperty("index", null);
+		String index = System.getProperty(InputParaTag.INDEX, null);
 		if(!isNullOrEmpty(index)){
 			List<String> indexes = Splitter.on(',').trimResults()
 				       .omitEmptyStrings()

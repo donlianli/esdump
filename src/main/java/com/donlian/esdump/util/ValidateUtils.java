@@ -13,10 +13,11 @@ import com.donlian.esdump.enu.DataMode;
  */
 public class ValidateUtils {
 	private static Logger logger = LogManager.getLogger(ValidateUtils.class);
+	private ValidateUtils(){};
 	/**
 	 * 数据模式校验
 	 */
-	public static void valideMode(){
+	public static void validMode(){
 		String mode = System.getProperty("mode", "backup");
 		DataMode m = DataMode.valueOfEnum(mode);
 		checkNotNull(m,"invalide mode:"+mode);

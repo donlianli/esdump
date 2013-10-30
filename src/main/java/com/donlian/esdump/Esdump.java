@@ -4,7 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.donlian.esdump.backup.BackupService;
-import com.donlian.esdump.config.ConfigService;
+import com.donlian.esdump.common.InputParaTag;
 import com.donlian.esdump.enu.DataMode;
 import com.donlian.esdump.guice.DefaultModule;
 import com.donlian.esdump.util.ValidateUtils;
@@ -22,7 +22,7 @@ public class Esdump {
 		/**
 		 * 校验参数
 		 */
-		ValidateUtils.valideMode();
+		ValidateUtils.validMode();
 		/**
 		 * 初始化guice,准备对应资源
 		 */
@@ -31,7 +31,7 @@ public class Esdump {
 		/**
 		 * 根据输入的模式，进入对应的入口
 		 */
-		String mode = System.getProperty("mode", "backup");
+		String mode = System.getProperty(InputParaTag.MODE, "backup");
 		DataMode m = DataMode.valueOfEnum(mode);
 		switch(m){
 		case BACKUP:{

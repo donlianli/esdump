@@ -6,6 +6,7 @@ package com.donlian.esdump.common;
  *
  */
 public class Tag {
+	private Tag(){};
 	/**
 	 * 索引名称标签
 	 */
