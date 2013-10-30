@@ -6,9 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,8 +33,6 @@ import com.google.inject.Inject;
 public class BackupServiceImpl implements BackupService{
 	private static Logger logger = LogManager.getLogger(BackupServiceImpl.class);
 	private ConfigService configService;
-	private boolean multiThread = true;
-	private CountDownLatch latch;
 	private ExecutorService exec;  
 	@Inject
 	public BackupServiceImpl(ConfigService configService){
@@ -70,12 +68,10 @@ public class BackupServiceImpl implements BackupService{
 				}
 				else {
 					//采用队列多线程模式
-					CountDownLatch latch = new CountDownLatch(allIndex.size());
-					this.latch = latch;
 					int cpuCoreNumber = Runtime.getRuntime().availableProcessors();  
-					logger.debug("cpu cores:{}",cpuCoreNumber);
+					logger.debug("cpu core(threadpool number):{}",cpuCoreNumber);
 			        exec = Executors.newFixedThreadPool(cpuCoreNumber);  
-			        
+			        int indexCount=0;
 			        for(String indexName : allIndex){
 			        	final String iName = indexName;
 			        	exec.submit(new Callable<Object>(){
@@ -84,10 +80,13 @@ public class BackupServiceImpl implements BackupService{
 								return null;
 							}
 			        	});
+			        	indexCount++;
 					}
+			        logger.info("{} index will be backup",indexCount);
 					try {
-						latch.await();
-					} catch (InterruptedException e) {
+						exec.shutdown();
+						exec.awaitTermination(1, TimeUnit.DAYS);
+					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				}
@@ -108,11 +107,6 @@ public class BackupServiceImpl implements BackupService{
 		} catch (Exception e) {
 			logger.error("backup index:{} error",indexName);
 			e.printStackTrace();
-		}
-		finally{
-			if(this.multiThread && this.latch!=null){
-				this.latch.countDown();
-			}
 		}
 	}
 	/**
@@ -153,8 +147,8 @@ public class BackupServiceImpl implements BackupService{
 		}
 		jGenerator.flush();
 		jGenerator.close();
-		logger.info("backup {} mapping count:{}" , indexName,mappingCount);
-		logger.debug("backup {} mapping useTime:{}",indexName, (System.currentTimeMillis() - startTime));
+		logger.info("backup {} mapping count:{}, useTime:{}" , indexName,mappingCount,
+				 (System.currentTimeMillis() - startTime));
 	}
 	
 	public  void backupDoc(String indexName) throws Exception{

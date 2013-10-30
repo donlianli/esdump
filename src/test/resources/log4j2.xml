@@ -4,10 +4,16 @@
     <Console name="Console" target="SYSTEM_OUT">
       <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
     </Console>
+    <File name="File" fileName="d:/temp/log4j2.log">
+      <PatternLayout>
+        <pattern>%d %p %C{1.} [%t] %m%n</pattern>
+      </PatternLayout>
+    </File>
   </appenders>
   <loggers>
     <root level="debug">
       <appender-ref ref="Console"/>
+      <appender-ref ref="File"/>
     </root>
   </loggers>
 </configuration>
