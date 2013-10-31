@@ -76,6 +76,11 @@ public interface ConfigService {
 	 */
 	Client getBackupClient();
 	/**
+	 * 恢复的客户端
+	 * @return
+	 */
+	Client getRestoreClient();
+	/**
 	 * 获得来源客户端
 	 * @return Client
 	 */
@@ -126,6 +131,11 @@ public interface ConfigService {
 	 * @param config
 	 */
 	public void initBackupConfig();
+	/**
+	 * 初始化备份配置
+	 * @param config
+	 */
+	public void initRestoreConfig();
 	public List<String> getBackupIndices() ;
-	
+	public List<String> getRestoreIndices() ;
 }

@@ -19,10 +19,12 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 public class ConfigServiceImpl implements ConfigService {
 	private static Logger logger = LogManager.getLogger(ConfigServiceImpl.class);
 	private Client backupClient;
+	private Client restoreClient;
 	private Client sourceClient;
 	private Client targetClient;
 	private String clusterName;
 	private List<String> backupIndices;
+	private List<String> restoreIndices;
 	/**
 	 * bulkindex的默认数量
 	 */
@@ -71,7 +73,9 @@ public class ConfigServiceImpl implements ConfigService {
 	public Client getBackupClient() {
 		return backupClient;
 	}
-
+	public Client getRestoreClient() {
+		return restoreClient;
+	}
 	public Client getSourceClient() {
 		return sourceClient;
 	}
@@ -170,7 +174,58 @@ public class ConfigServiceImpl implements ConfigService {
 			backupIndices = indexes;
 		}
 	}
-
+	/**
+	 * 初始化恢复设置
+	 */
+	public void initRestoreConfig() {
+		logger.debug("initRestoreConfig");
+		/**
+		 * 备份机器
+		 */
+		String address = System.getProperty(InputParaTag.ADDR, DEFAULT_ADDRESS);
+		List<String> list = Splitter.on(':').trimResults()
+					       .omitEmptyStrings()
+					       .splitToList(address);
+		String host = list.get(0);
+		String port = list.get(1);
+		/**
+		 * 设置集群名称
+		 */
+		String clusterName = System.getProperty(InputParaTag.CLUSTER, DEFAULT_CLUSTER_NAME);
+		setBackupClusterName(clusterName);
+		Settings settings = ImmutableSettings.settingsBuilder()
+				//指定集群名称
+                .put("cluster.name", clusterName)
+                //探测集群中机器状态
+                .put("client.transport.sniff", false).build();
+		/*
+		 * 创建客户端，所有的操作都由客户端开始，这个就好像是JDBC的Connection对象
+		 * 用完记得要关闭
+		 */
+		Client client = new TransportClient(settings)
+		.addTransportAddress(new InetSocketTransportAddress(host, Integer.parseInt(port)));
+		this.restoreClient = client;
+		/**
+		 * 设置恢复目录，没有则以当前目录为准
+		 */
+		String restoreDire = System.getProperty(InputParaTag.RESTORE_DIR, getDefaultDir());
+		setRestoreDir(restoreDire);
+		if(logger.isInfoEnabled()){
+			logger.info("clusterName:{},connect use address:{}:{},restore directory:{}"
+					,clusterName,host,port,restoreDire);
+		}
+		logger.debug("initRestoreConfig over");
+		/**
+		 * 设置备份特定的索引
+		 */
+		String index = System.getProperty(InputParaTag.INDEX, null);
+		if(!isNullOrEmpty(index)){
+			List<String> indexes = Splitter.on(',').trimResults()
+				       .omitEmptyStrings()
+				       .splitToList(index);
+			restoreIndices = indexes;
+		}
+	}
 	private String getDefaultDir() {
 		File directory = new File("");//设定为当前文件夹
 		try{
@@ -189,6 +244,14 @@ public class ConfigServiceImpl implements ConfigService {
 
 	public List<String> getBackupIndices() {
 		return backupIndices;
+	}
+
+	public List<String> getRestoreIndices() {
+		return restoreIndices;
+	}
+
+	public void setRestoreIndices(List<String> restoreIndices) {
+		this.restoreIndices = restoreIndices;
 	}
 	
 }

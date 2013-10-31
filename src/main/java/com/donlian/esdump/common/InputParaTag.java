@@ -7,4 +7,5 @@ public class InputParaTag {
 	public static final String INDEX="index";
 	public static final String MODE="mode";
 	public static final String BACKUP_DIR="backupdir";
+	public static final String RESTORE_DIR="backupdir";
 }

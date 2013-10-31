@@ -32,12 +32,12 @@ import com.google.inject.Inject;
 
 public class BackupServiceImpl implements BackupService{
 	private static Logger logger = LogManager.getLogger(BackupServiceImpl.class);
-	private ConfigService configService;
 	private ExecutorService exec;  
 	@Inject
 	public BackupServiceImpl(ConfigService configService){
-		this.configService = configService;
+		setConfigService(configService);
 	}
+	private ConfigService configService;
 	public ConfigService getConfigService() {
 		return configService;
 	}
@@ -50,48 +50,41 @@ public class BackupServiceImpl implements BackupService{
 	public void backup() {
 		logger.debug("enter backup method");
 		configService.initBackupConfig();
-		List<String> index = configService.getBackupIndices();
-		if(index != null && index.size()>0){
-			//仅备份指定索引
-			for(String indexName : index){
-				backupByIndexName(indexName);
-			}
-		}
-		else {
+		List<String> backupIndices = configService.getBackupIndices();
+		if(backupIndices == null || backupIndices.size()==0){
 			//备份该集群下面所有索引
-			List<String> allIndex = this.getAllIndexes();
-			if(allIndex!=null && allIndex.size()>0){
-				if(configService.disableMultiThread()){
-					for(String indexName : allIndex){
-						backupByIndexName(indexName);
-					}
-				}
-				else {
-					//采用队列多线程模式
-					int cpuCoreNumber = Runtime.getRuntime().availableProcessors();  
-					logger.debug("cpu core(threadpool number):{}",cpuCoreNumber);
-			        exec = Executors.newFixedThreadPool(cpuCoreNumber);  
-			        int indexCount=0;
-			        for(String indexName : allIndex){
-			        	final String iName = indexName;
-			        	exec.submit(new Callable<Object>(){
-							public Object call() throws Exception {
-								backupByIndexName(iName);
-								return null;
-							}
-			        	});
-			        	indexCount++;
-					}
-			        logger.info("{} index will be backup",indexCount);
-					try {
-						exec.shutdown();
-						exec.awaitTermination(1, TimeUnit.DAYS);
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
+			backupIndices = getAllIndexesFromEs();
+		}
+		if(backupIndices!=null && backupIndices.size()>0){
+			if(configService.disableMultiThread()){
+				for(String indexName : backupIndices){
+					backupByIndexName(indexName);
 				}
 			}
-			
+			else {
+				//采用队列多线程模式
+				int cpuCoreNumber = Runtime.getRuntime().availableProcessors();  
+				logger.debug("cpu core(threadpool number):{}",cpuCoreNumber);
+		        exec = Executors.newFixedThreadPool(cpuCoreNumber);  
+		        int indexCount=0;
+		        for(String indexName : backupIndices){
+		        	final String iName = indexName;
+		        	exec.submit(new Callable<Object>(){
+						public Object call() throws Exception {
+							backupByIndexName(iName);
+							return null;
+						}
+		        	});
+		        	indexCount++;
+				}
+		        logger.info("{} index will be backup",indexCount);
+				try {
+					exec.shutdown();
+					exec.awaitTermination(1, TimeUnit.DAYS);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
 		}
 		configService.getBackupClient().close();
 		logger.debug("exit backup method");
@@ -228,7 +221,7 @@ public class BackupServiceImpl implements BackupService{
 	 * 获得当前索引的所有索引
 	 * @return
 	 */
-	public List<String> getAllIndexes() {
+	public List<String> getAllIndexesFromEs() {
 		Client client = configService.getBackupClient();
 		ClusterState cs = client.admin().cluster().prepareState()
 				.execute().actionGet().getState();

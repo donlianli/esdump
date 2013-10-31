@@ -7,6 +7,7 @@ import com.donlian.esdump.backup.BackupService;
 import com.donlian.esdump.common.InputParaTag;
 import com.donlian.esdump.enu.DataMode;
 import com.donlian.esdump.guice.DefaultModule;
+import com.donlian.esdump.restore.RestoreService;
 import com.donlian.esdump.util.ValidateUtils;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -42,6 +43,8 @@ public class Esdump {
 		}
 		case RESTORE:{
 			logger.info("restore mode");
+			RestoreService service = injector.getInstance(RestoreService.class);
+			service.restore();
 			break;
 		}
 		case PIPE:{
