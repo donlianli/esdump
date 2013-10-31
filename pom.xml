@@ -5,19 +5,17 @@
   <artifactId>esdump</artifactId>
   <version>0.0.1</version>
   <packaging>jar</packaging>
-
   <name>esdump</name>
   <url>http://maven.apache.org</url>
-
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
-
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.11</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
@@ -25,11 +23,7 @@
 			<version>2.0-beta8</version>
 			<type>jar</type>
 		</dependency>
-		<dependency>
-		<groupId>com.google.inject</groupId>
-			<artifactId>guice</artifactId>
-			<version>4.0-beta</version>
-		</dependency> 
+	
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>
@@ -42,7 +36,11 @@
 			<version>0.90.5</version>
 			<type>jar</type>
 		</dependency>
-		
+		<dependency>
+		<groupId>com.google.inject</groupId>
+			<artifactId>guice</artifactId>
+			<version>4.0-beta</version>
+		</dependency> 
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
